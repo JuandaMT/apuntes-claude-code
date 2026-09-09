@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cuaderno de Claude Code — Apuntes de formación agéntica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#171A1F;
+    --panel:#1E222A;
+    --panel-border:#2A2F38;
+    --text:#E6E4DD;
+    --text-dim:#9098A0;
+    --accent:#C98A3E;
+    --accent-dim:#C98A3E33;
+    --sage:#7FA88C;
+    --code-bg:#12141A;
+    --danger:#C97070;
+    --maxw:700px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'IBM Plex Sans',sans-serif;
+    font-size:16px;
+    line-height:1.65;
+  }
+  h1,h2,h3,h4{
+    font-family:'IBM Plex Serif',serif;
+    font-weight:600;
+    line-height:1.25;
+    color:var(--text);
+  }
+  a{color:var(--sage);text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  code, .mono{font-family:'IBM Plex Mono',monospace;font-size:0.88em;}
+  code{background:var(--code-bg);padding:0.15em 0.4em;border-radius:3px;color:#E0C89A;}
+  pre{
+    background:var(--code-bg);
+    border:1px solid var(--panel-border);
+    border-radius:6px;
+    padding:16px 18px;
+    overflow-x:auto;
+    line-height:1.55;
+  }
+  pre code{background:none;padding:0;color:#D8DEE0;}
+
+  /* Layout */
+  .app{display:flex;min-height:100vh;}
+  .sidebar{
+    width:280px;
+    flex-shrink:0;
+    background:var(--panel);
+    border-right:1px solid var(--panel-border);
+    padding:28px 20px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .sidebar-title{
+    font-family:'IBM Plex Serif',serif;
+    font-size:1.15rem;
+    margin:0 0 4px;
+  }
+  .sidebar-sub{color:var(--text-dim);font-size:0.82rem;margin:0 0 20px;}
+  #search{
+    width:100%;
+    background:var(--bg);
+    border:1px solid var(--panel-border);
+    color:var(--text);
+    padding:8px 10px;
+    border-radius:5px;
+    font-family:inherit;
+    font-size:0.88rem;
+    margin-bottom:18px;
+  }
+  #search:focus{outline:1px solid var(--accent);border-color:var(--accent);}
+  .nav-group{margin-bottom:6px;}
+  .nav-group-title{
+    font-size:0.72rem;
+    color:var(--accent);
+    letter-spacing:0.03em;
+    margin:18px 0 6px;
+    font-weight:500;
+  }
+  .nav-group-title .num{color:var(--text-dim);margin-right:6px;font-family:'IBM Plex Mono',monospace;}
+  .nav-link{
+    display:block;
+    padding:5px 0 5px 14px;
+    color:var(--text-dim);
+    font-size:0.87rem;
+    border-left:2px solid transparent;
+  }
+  .nav-link:hover{color:var(--text);text-decoration:none;border-left-color:var(--panel-border);}
+  .nav-link.active{color:var(--text);border-left-color:var(--accent);}
+  .nav-hidden{display:none !important;}
+
+  main{flex:1;min-width:0;padding:56px 48px 120px;}
+  .content{max-width:var(--maxw);margin:0 auto;}
+
+  .hero h1{font-size:2.1rem;margin:0 0 14px;}
+  .hero p.lede{font-size:1.08rem;color:var(--text-dim);max-width:560px;}
+  .hero .meta{font-size:0.85rem;color:var(--text-dim);margin-top:22px;padding-top:18px;border-top:1px solid var(--panel-border);}
+
+  section{margin-top:64px;padding-top:8px;}
+  section h2{font-size:1.5rem;border-bottom:1px solid var(--panel-border);padding-bottom:12px;margin-bottom:20px;}
+  section h2 .num{color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:0.75em;margin-right:10px;}
+  h3{font-size:1.15rem;margin-top:34px;}
+  p{margin:0 0 14px;}
+  ul,ol{padding-left:22px;margin:0 0 16px;}
+  li{margin-bottom:6px;}
+
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:0.9rem;}
+  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--panel-border);vertical-align:top;}
+  th{color:var(--accent);font-weight:500;font-size:0.82rem;}
+
+  .callout{
+    background:var(--panel);
+    border:1px solid var(--panel-border);
+    border-left:3px solid var(--accent);
+    border-radius:4px;
+    padding:14px 18px;
+    margin:20px 0;
+    font-size:0.93rem;
+  }
+  .callout.warn{border-left-color:var(--danger);}
+  .callout p:last-child{margin-bottom:0;}
+  .callout-label{font-size:0.72rem;color:var(--accent);margin:0 0 6px;font-weight:500;}
+  .callout.warn .callout-label{color:var(--danger);}
+
+  footer{
+    max-width:var(--maxw);margin:0 auto;padding-top:40px;margin-top:60px;
+    border-top:1px solid var(--panel-border);color:var(--text-dim);font-size:0.85rem;
+  }
+
+  .menu-toggle{display:none;}
+
+  @media (max-width:860px){
+    .sidebar{position:fixed;left:0;top:0;z-index:20;transform:translateX(-100%);transition:transform .2s;box-shadow:2px 0 20px rgba(0,0,0,.4);}
+    .sidebar.open{transform:translateX(0);}
+    main{padding:56px 22px 100px;}
+    .menu-toggle{
+      display:block;position:fixed;top:16px;left:16px;z-index:30;
+      background:var(--panel);border:1px solid var(--panel-border);color:var(--text);
+      padding:8px 12px;border-radius:5px;font-family:'IBM Plex Mono',monospace;font-size:0.8rem;
+    }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰ índice</button>
+
+<div class="app">
+  <nav class="sidebar" id="sidebar">
+    <p class="sidebar-title">Cuaderno de Claude Code</p>
+    <p class="sidebar-sub">Apuntes de una formación agéntica</p>
+    <input type="text" id="search" placeholder="Buscar en el índice…" oninput="filterNav(this.value)">
+    <div id="navtree"></div>
+  </nav>
+
+  <main>
+    <div class="content">
+
+      <div class="hero">
+        <h1>Aprendiendo a dirigir agentes, no solo a chatear con uno</h1>
+        <p class="lede">Estos son los apuntes de una formación completa sobre los flujos agénticos de Claude Code — desde la configuración base hasta orquestar equipos de agentes en producción. Cada sección viene de ejemplos construidos y probados contra un proyecto real, no de teoría suelta.</p>
+        <p class="meta">Escrito por Juanda, con Claude como profesor. Pensado para cualquiera que quiera pasar de usar Claude Code de forma básica a diseñar sistemas agénticos con control real sobre coste, permisos y ejecución.</p>
+      </div>
+
+      <!-- ============ FUNDAMENTOS ============ -->
+      <section id="fundamentos">
+        <h2><span class="num">01</span>Fundamentos</h2>
+
+        <h3 id="claude-md">CLAUDE.md</h3>
+        <p>Es el archivo que Claude Code carga en cada sesión — el equivalente a explicarle el proyecto a un compañero nuevo, pero una sola vez. Puede vivir en dos sitios, ambos válidos: <code>./CLAUDE.md</code> en la raíz (el más común, junto al README) o <code>./.claude/CLAUDE.md</code>. Se genera con <code>/init</code> y luego se pule a mano.</p>
+
+        <table>
+          <tr><th>Incluir</th><th>Excluir</th></tr>
+          <tr><td>Comandos que Claude no puede adivinar (test individual, build)</td><td>Cosas deducibles leyendo el código</td></tr>
+          <tr><td>Convenciones de estilo que difieren del estándar</td><td>Convenciones estándar del lenguaje</td></tr>
+          <tr><td>Reglas de git/PR del equipo</td><td>Documentación larga de API (mejor un enlace)</td></tr>
+        </table>
+
+        <div class="callout">
+          <p class="callout-label">Regla de oro</p>
+          <p>Para cada línea: "si la quito, ¿Claude se equivocaría?" Si no, sobra. Objetivo: menos de 200 líneas — un archivo largo hace que Claude ignore reglas porque se pierden entre el ruido.</p>
+        </div>
+
+        <p>Si el proyecto ya usa <code>AGENTS.md</code> (el estándar cruzado entre herramientas — Codex, Cursor, Copilot), Claude Code no lo lee de forma nativa. Se soluciona importándolo desde CLAUDE.md:</p>
+        <pre><code>@AGENTS.md
+
+## Solo para Claude Code
+Usa plan mode para cambios en src/billing/.</code></pre>
+
+        <p>En monorepos, Claude busca CLAUDE.md subiendo por el árbol de directorios — puedes tener uno general en la raíz y otros más específicos en <code>packages/api/</code>. También existe <code>~/.claude/CLAUDE.md</code> para preferencias tuyas que aplican a todos tus proyectos.</p>
+
+        <h3 id="permisos">Permisos y modos</h3>
+        <p>Desde hace poco, el modo por defecto en Pro/Max/Team ya no es "preguntar siempre" — es <strong>auto mode</strong>: un clasificador revisa las acciones y solo interrumpe cuando algo parece realmente arriesgado.</p>
+        <table>
+          <tr><th>Modo</th><th>Comportamiento</th></tr>
+          <tr><td><code>plan</code></td><td>Solo lectura — explora sin tocar nada</td></tr>
+          <tr><td><code>acceptEdits</code></td><td>Auto-acepta ediciones y comandos comunes</td></tr>
+          <tr><td><code>auto</code></td><td>Un clasificador decide (por defecto en Pro/Max/Team)</td></tr>
+          <tr><td><code>dontAsk</code></td><td>Deniega lo que no esté explícitamente permitido</td></tr>
+          <tr><td><code>bypassPermissions</code></td><td>Sin comprobaciones</td></tr>
+        </table>
+        <p><code>/permissions</code> abre un panel con las reglas activas (alias <code>/allowed-tools</code>). Cada regla es <code>allow</code>, <code>ask</code> o <code>deny</code>, con formato <code>Herramienta(patrón)</code> — por ejemplo <code>Bash(git push:*)</code> o <code>Task(nombre-de-agente)</code>. Se evalúan en orden <strong>deny → ask → allow</strong>, y gana la primera coincidencia, sin importar cuál sea más específica.</p>
+        <p>Viven en tres niveles: <code>~/.claude/settings.json</code> (tú, todos tus proyectos), <code>.claude/settings.json</code> (equipo, va a git), <code>.claude/settings.local.json</code> (tú, este proyecto — normalmente en <code>.gitignore</code>).</p>
+
+        <h3 id="mcp">MCP — conectar herramientas externas</h3>
+        <p>MCP le da a Claude herramientas ejecutables que hablan con servicios reales (Notion, Postman, una base de datos), no solo archivos. Es una conexión viva, distinta de cualquier archivo de configuración.</p>
+        <pre><code>claude mcp add --transport http nombre https://url-del-servidor
+claude mcp add --transport stdio nombre --env KEY=valor -- npx -y paquete</code></pre>
+        <table>
+          <tr><th>Scope</th><th>Vive en</th><th>Alcance</th></tr>
+          <tr><td><code>local</code> (default)</td><td>Estado de usuario</td><td>Solo tú, este proyecto</td></tr>
+          <tr><td><code>project</code></td><td><code>.mcp.json</code>, va a git</td><td>Todo el equipo, este proyecto</td></tr>
+          <tr><td><code>user</code></td><td><code>~/.claude.json</code></td><td>Tú, todos tus proyectos</td></tr>
+        </table>
+        <div class="callout">
+          <p class="callout-label">Detalle importante</p>
+          <p>Claude Code sincroniza automáticamente los conectores que ya tienes activos en claude.ai (Notion, Postman, Figma...). Es todo-o-nada a nivel de cuenta: se registran en <em>todos</em> tus proyectos, sin scoping fino por proyecto todavía.</p>
+        </div>
+        <p>Un subagente solo ve los servidores MCP listados explícitamente en su campo <code>mcpServers</code> — así puedes evitar que un subagente cargue conectores que no necesita, aunque estén sincronizados globalmente.</p>
+      </section>
+
+      <!-- ============ BUCLE DE TRABAJO ============ -->
+      <section id="bucle">
+        <h2><span class="num">02</span>El bucle de trabajo</h2>
+
+        <h3 id="verificacion">Dale a Claude una forma de verificarse</h3>
+        <p>Sin un check ejecutable, "parece terminado" es la única señal que existe. Con un check (tests, build, captura comparada con un diseño), el bucle se cierra solo: Claude implementa, corre el check, lee el resultado, itera.</p>
+        <table>
+          <tr><th>Nivel de autonomía</th><th>Mecanismo</th></tr>
+          <tr><td>Un mensaje</td><td>Pide correr el check en la misma instrucción</td></tr>
+          <tr><td>Toda la sesión</td><td><code>/goal</code> — condición de éxito evaluada tras cada turno</td></tr>
+          <tr><td>Puerta determinista</td><td>Hook <code>Stop</code> que bloquea hasta que el check pase</td></tr>
+          <tr><td>Segunda opinión</td><td>Subagente en contexto limpio que intenta refutar el resultado</td></tr>
+        </table>
+
+        <h3 id="plan-mode">Explorar → Planificar → Codificar</h3>
+        <p>Plan mode es un <strong>modo de permisos</strong>, no un subagente aparte: restringe la sesión a herramientas de solo lectura (Read, Grep, Glob, WebFetch, WebSearch, TodoWrite) y bloquea Edit/Write/la mayoría de Bash.</p>
+        <ul>
+          <li><strong>Entrar:</strong> <code>Shift+Tab</code> (cicla modos), <code>/plan</code>, <code>claude --permission-mode plan</code> (funciona headless), o <code>defaultMode: "plan"</code> en settings.json</li>
+          <li><strong>Salir:</strong> Claude llama a la herramienta <code>ExitPlanMode</code>, presenta el plan, exige confirmación explícita</li>
+        </ul>
+        <div class="callout warn">
+          <p class="callout-label">Matices honestos</p>
+          <p>El límite lo aplica una instrucción de sistema más el sistema de permisos — no es un sandbox real. Plan mode bloquea escrituras, no lecturas: puede seguir leyendo archivos sensibles. Y las transiciones de entrada/salida de plan mode todavía no son visibles para el sistema de hooks.</p>
+        </div>
+
+        <h3 id="contexto">Gestión de contexto</h3>
+        <p>La ventana por defecto son 200K tokens, y ya hay ocupación antes de escribir nada:</p>
+        <table>
+          <tr><th>Componente</th><th>Coste típico</th></tr>
+          <tr><td>System prompt + herramientas base</td><td>~20.000 (fijo)</td></tr>
+          <tr><td>Esquemas de servidores MCP</td><td>900–51.000 (según cuántos tengas)</td></tr>
+          <tr><td>CLAUDE.md</td><td>300–2.000 — sobrevive a la compactación</td></tr>
+        </table>
+        <p>El auto-compact se dispara al acercarse a la capacidad (el umbral exacto varía según versión, aproximadamente 75-95%), en dos fases: primero se limpian resultados de herramientas (lecturas de archivo, greps, salidas de bash — suele ser 60-80% del consumo), luego se resume la conversación restante. Se pierde el detalle fino (rutas exactas, texto de errores); sobrevive lo estructural (decisiones, patrones, CLAUDE.md).</p>
+        <ul>
+          <li><code>/clear</code> — entre tareas no relacionadas, evita forzar una compactación en mal momento</li>
+          <li><code>/compact &lt;foco&gt;</code> — compactación manual con instrucciones de qué preservar</li>
+          <li><code>/rewind</code> — restaura código, conversación o ambos a un punto anterior</li>
+        </ul>
+      </section>
+
+      <!-- ============ SUBAGENTES ============ -->
+      <section id="subagentes">
+        <h2><span class="num">03</span>Subagentes</h2>
+        <p>Un subagente corre en su propia ventana de contexto, con su propio system prompt y su propio conjunto de herramientas. Vive en <code>.claude/agents/nombre.md</code> (proyecto, va a git) o <code>~/.claude/agents/</code> (usuario, todos tus proyectos).</p>
+
+        <pre><code>---
+name: security-auditor
+description: Auditor de seguridad senior. Revisa cambios en busca de
+  vulnerabilidades. Invócalo explícitamente con @security-auditor.
+tools: Read, Grep, Glob, Bash(git diff:*), Bash(git log:*)
+model: inherit
+memory: project
+---
+
+Eres un auditor de seguridad senior. Piensas como un atacante...</code></pre>
+
+        <table>
+          <tr><th>Campo</th><th>Qué hace</th></tr>
+          <tr><td><code>tools</code></td><td>Lista exacta permitida — cualquier otra herramienta falla estructuralmente, no por criterio del agente</td></tr>
+          <tr><td><code>model</code></td><td><code>inherit</code>, o fija <code>haiku</code> para tareas simples y ahorrar, <code>opus</code> para rigor</td></tr>
+          <tr><td><code>permissionMode</code></td><td>Modo de permisos propio, independiente del de la sesión principal</td></tr>
+          <tr><td><code>maxTurns</code></td><td>Límite duro de turnos — evita que se quede corriendo indefinidamente</td></tr>
+          <tr><td><code>isolation: worktree</code></td><td>Edita en su propia copia aislada del repo</td></tr>
+          <tr><td><code>background: true</code></td><td>Corre en segundo plano sin bloquear la sesión</td></tr>
+          <tr><td><code>memory: project</code></td><td>Recuerda entre sesiones (en <code>.claude/agent-memory/</code>)</td></tr>
+          <tr><td><code>mcpServers</code></td><td>Solo los servidores MCP listados aquí — no hereda los de la sesión</td></tr>
+        </table>
+
+        <h3>Proactivo vs. manual</h3>
+        <p>La palabra <strong>"proactively"</strong> en la <code>description</code> es la señal que hace que Claude lo dispare solo. Quitarla no es un bloqueo técnico absoluto, pero reduce mucho la probabilidad — para una garantía dura, combínalo con una regla <code>ask</code> en permisos sobre <code>Task(nombre-del-agente)</code>.</p>
+
+        <h3>Los que ya tienes gratis</h3>
+        <table>
+          <tr><th>Subagente</th><th>Modelo</th><th>Para qué</th></tr>
+          <tr><td><code>Explore</code></td><td>Haiku, solo lectura</td><td>Búsquedas rápidas en código</td></tr>
+          <tr><td><code>Plan</code></td><td>Hereda, solo lectura</td><td>Es el que usa plan mode por debajo</td></tr>
+          <tr><td><code>general-purpose</code></td><td>Hereda, todas las herramientas</td><td>Tareas complejas multi-paso</td></tr>
+        </table>
+
+        <div class="callout">
+          <p class="callout-label">Lo que un subagente ve — y no ve</p>
+          <p>Solo su propio system prompt, el prompt de la tarea, info del entorno, y los skills/MCP que liste explícitamente. No hereda tu historial de conversación ni lo que tu sesión principal tiene cargado.</p>
+        </div>
+      </section>
+
+      <!-- ============ HOOKS ============ -->
+      <section id="hooks">
+        <h2><span class="num">04</span>Hooks</h2>
+        <p>Donde CLAUDE.md sugiere, un hook <strong>garantiza</strong>: un script que se ejecuta sí o sí en un punto del ciclo de vida, fuera del control del modelo. Se configuran en <code>settings.json</code> o interactivamente con <code>/hooks</code>.</p>
+
+        <p>El hook recibe JSON por stdin y decide con su código de salida: <code>0</code> = adelante, <code>2</code> = bloquea y devuelve el motivo a Claude por stderr, otro código = advertencia no bloqueante. Eventos núcleo: <code>PreToolUse</code>, <code>PostToolUse</code>, <code>Stop</code>, <code>SessionStart</code>, <code>UserPromptSubmit</code>, <code>SubagentStop</code> (se dispara cuando termina un subagente concreto).</p>
+
+        <h3>Ejemplo real: cerrar el círculo de una auditoría</h3>
+        <p>Dos hooks trabajando juntos — cuando <code>security-auditor</code> termina, marca el commit como auditado; al intentar <code>git push</code>, se comprueba esa marca:</p>
+        <pre><code>{
+  "hooks": {
+    "SubagentStop": [{ "hooks": [{ "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/mark-audit-passed.sh" }] }],
+    "PreToolUse": [{ "matcher": "Bash", "hooks": [{ "type": "command",
+      "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/require-audit-before-push.sh" }] }]
+  }
+}</code></pre>
+        <div class="callout warn">
+          <p class="callout-label">Prueba antes de confiar</p>
+          <p>Hay reportes documentados de <code>PreToolUse</code> con <code>exit 2</code> que no bloquearon <code>git push</code> en ciertas versiones. Antes de depender de esto para algo crítico, verifica tú mismo que de verdad se detiene.</p>
+        </div>
+      </section>
+
+      <!-- ============ SKILLS ============ -->
+      <section id="skills">
+        <h2><span class="num">05</span>Skills</h2>
+        <p>Una carpeta con <code>SKILL.md</code> (frontmatter + instrucciones) que Claude carga por su cuenta cuando la tarea coincide con la <code>description</code> — sin invocación manual necesaria. La clave es el coste: al arrancar, solo se cargan nombre y descripción de cada skill (~80 tokens), el cuerpo completo se queda en disco hasta que se dispara de verdad.</p>
+        <p>Estructura recomendada para skills grandes: <code>SKILL.md</code> (delgado, bajo 500 líneas) + <code>scripts/</code> (código ejecutable) + <code>references/</code> (docs cargados solo si hace falta) + <code>assets/</code> (plantillas). Vive en <code>.claude/skills/nombre/</code>.</p>
+        <pre><code>---
+name: nuevo-endpoint-api
+description: Checklist para añadir un endpoint nuevo a la API.
+---
+
+# Añadir un nuevo endpoint
+1. Define el contrato antes de escribir código
+2. Sigue el patrón de un endpoint existente similar
+3. Valida con @api-tester antes de terminar</code></pre>
+      </section>
+
+      <!-- ============ PLUGINS ============ -->
+      <section id="plugins">
+        <h2><span class="num">06</span>Plugins</h2>
+        <p>Empaquetan subagentes, hooks, skills y declaraciones MCP en una unidad instalable con un comando, en vez de que cada persona copie archivos sueltos. Dos manifiestos con trabajos distintos: <code>marketplace.json</code> es el catálogo, <code>plugin.json</code> es la identidad del plugin.</p>
+        <pre><code>mi-marketplace/
+├── .claude-plugin/marketplace.json
+└── mi-plugin/
+    ├── .claude-plugin/plugin.json
+    ├── agents/       (auto-descubierto)
+    ├── hooks/hooks.json
+    └── scripts/</code></pre>
+        <pre><code>/plugin marketplace add ./mi-marketplace
+/plugin install mi-plugin@mi-marketplace</code></pre>
+        <p>Los componentes van en la raíz del plugin, no dentro de <code>.claude-plugin/</code> — Claude Code escanea carpetas con nombre reservado (<code>agents/</code>, <code>hooks/</code>, <code>skills/</code>, <code>commands/</code>) automáticamente. Dentro de <code>hooks.json</code>, usa <code>${CLAUDE_PLUGIN_ROOT}</code> en vez de <code>$CLAUDE_PROJECT_DIR</code> — el plugin puede instalarse en cualquier ruta.</p>
+        <div class="callout">
+          <p class="callout-label">Lo que un plugin NO empaqueta</p>
+          <p>Una conexión MCP autenticada (cada persona necesita la suya propia) ni las reglas de <code>settings.json</code> de quien lo instala — eso sigue siendo local a cada persona/proyecto.</p>
+        </div>
+      </section>
+
+      <!-- ============ PARALELISMO ============ -->
+      <section id="paralelismo">
+        <h2><span class="num">07</span>Paralelismo</h2>
+
+        <h3>Git worktrees</h3>
+        <p>Varias carpetas de trabajo, cada una en una rama distinta, todas leyendo del mismo historial compartido — sin clonar el repo. <code>claude --worktree nombre</code> a nivel de sesión, o <code>isolation: worktree</code> en un subagente para lo mismo automáticamente.</p>
+        <pre><code>git worktree add ../mi-proyecto-bugfix bugfix-branch
+git worktree list
+git worktree remove ../mi-proyecto-bugfix</code></pre>
+        <div class="callout warn">
+          <p class="callout-label">Gotcha real</p>
+          <p>Un worktree nuevo solo contiene archivos ya trackeados por git. <code>.env</code>, <code>node_modules</code>, <code>.venv</code> nunca formaron parte de ese historial — no es un bug, es la consecuencia de cómo funciona el mecanismo.</p>
+        </div>
+
+        <h3>Agent teams</h3>
+        <p>Un agente líder decompone la tarea; los teammates trabajan en contextos aislados y <strong>se mensajean directamente entre sí</strong> — a diferencia de un subagente, que solo devuelve resultado a quien lo llamó. Añaden bloqueo de archivos para evitar sobrescrituras concurrentes. No hay comando especial: se describe en lenguaje natural.</p>
+        <pre><code>Crea un equipo para revisar el PR #142. Tres revisores:
+seguridad, rendimiento y cobertura de tests. Que reporten
+de forma independiente.</code></pre>
+        <table>
+          <tr><th></th><th>Subagentes</th><th>Agent teams</th></tr>
+          <tr><td>Comunicación</td><td>Devuelve resultado al que llamó</td><td>Mensajería directa entre miembros</td></tr>
+          <tr><td>Coste</td><td>Menor</td><td>Mayor — varias instancias completas a la vez</td></tr>
+          <tr><td>Mejor para</td><td>Tarea enfocada, resultado importa</td><td>Debate genuino, hipótesis en competencia</td></tr>
+        </table>
+      </section>
+
+      <!-- ============ AUTOMATIZACIÓN ============ -->
+      <section id="automatizacion">
+        <h2><span class="num">08</span>Automatización en producción</h2>
+
+        <h3>GitHub Actions</h3>
+        <p><code>/install-github-app</code> instala la GitHub App, añade la API key como secret, coloca el workflow. Tres modos automáticos: <strong>Interactivo</strong> (mención <code>@claude</code>), <strong>Automation</strong> (prompt explícito), <strong>Review</strong> (se dispara en cada PR, comenta directamente).</p>
+
+        <h3>Routines</h3>
+        <p>Un prompt guardado + los repos/conectores a los que accede, corriendo en la nube de Anthropic — no en tu máquina. Sin estado entre ejecuciones. Tres triggers combinables: <strong>schedule</strong> (mínimo 1 hora, tu zona horaria), <strong>API</strong> (endpoint HTTP propio por rutina), <strong>GitHub</strong> (eventos del repo, requiere instalar la GitHub App aparte).</p>
+
+        <h3>/goal</h3>
+        <p>Define una condición de finalización; tras cada turno, un <strong>modelo distinto y más ligero</strong> (Haiku por defecto) evalúa si se cumple — no el mismo Claude que hizo el trabajo, para evitar que sea juez y parte. Requiere v2.1.139+ y el diálogo de confianza del workspace aceptado.</p>
+        <pre><code>/goal migra este módulo hasta que todos los tests pasen --max-iterations 20</code></pre>
+      </section>
+
+      <!-- ============ COSTE ============ -->
+      <section id="coste">
+        <h2><span class="num">09</span>Coste y economía de tokens</h2>
+        <ul>
+          <li>Los subagentes no tienen descuento — consumen del mismo pool que tu sesión interactiva. El coste escala <strong>linealmente con la concurrencia</strong>, no con el mero hecho de usarlos: un subagente puntual suele ser más barato que hacerlo inline; varios en paralelo drenan la cuota proporcionalmente.</li>
+          <li>Agent teams puede llegar a consumir ~7x una sesión normal en plan mode — varias instancias completas corriendo a la vez, en modelos distintos.</li>
+          <li>Tu plan tiene dos capas: una ventana rodante de 5 horas (no se banca si no la usas) y un tope semanal acumulado. Las routines consumen del mismo pool que el uso interactivo — según la documentación oficial — aunque hay reportes de casos donde la facturación no siguió esa regla correctamente. Vale la pena vigilar el dashboard de coste las primeras veces.</li>
+        </ul>
+        <table>
+          <tr><th>Modelo</th><th>Coste por M tokens (entrada/salida)</th><th>Para qué</th></tr>
+          <tr><td>Opus</td><td>$15 / $75</td><td>Arquitectura, seguridad, decisiones críticas</td></tr>
+          <tr><td>Sonnet</td><td>$3 / $15</td><td>Implementación — el por defecto</td></tr>
+          <tr><td>Haiku</td><td>$0.25 / $1.25</td><td>Validación, docs, tareas mecánicas</td></tr>
+        </table>
+      </section>
+
+      <footer>
+        Apuntes en construcción — se amplían a medida que avanza la formación. Basados en la documentación oficial de Claude Code, verificada durante cada sesión de aprendizaje.
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const structure = [
+    {group:"Fundamentos", num:"01", links:[["claude-md","CLAUDE.md"],["permisos","Permisos y modos"],["mcp","MCP"]]},
+    {group:"El bucle de trabajo", num:"02", links:[["verificacion","Verificación"],["plan-mode","Plan mode"],["contexto","Gestión de contexto"]]},
+    {group:"Subagentes", num:"03", links:[["subagentes","Subagentes"]]},
+    {group:"Hooks", num:"04", links:[["hooks","Hooks"]]},
+    {group:"Skills", num:"05", links:[["skills","Skills"]]},
+    {group:"Plugins", num:"06", links:[["plugins","Plugins"]]},
+    {group:"Paralelismo", num:"07", links:[["paralelismo","Worktrees y agent teams"]]},
+    {group:"Automatización", num:"08", links:[["automatizacion","CI/CD, routines, /goal"]]},
+    {group:"Coste", num:"09", links:[["coste","Economía de tokens"]]},
+  ];
+
+  const nav = document.getElementById('navtree');
+  structure.forEach(g=>{
+    const gt = document.createElement('div');
+    gt.className='nav-group-title';
+    gt.innerHTML = `<span class="num">${g.num}</span>${g.group}`;
+    nav.appendChild(gt);
+    g.links.forEach(([id,label])=>{
+      const a = document.createElement('a');
+      a.href = '#'+id; a.className='nav-link'; a.textContent=label; a.dataset.text=(g.group+' '+label).toLowerCase();
+      nav.appendChild(a);
+    });
+  });
+
+  function filterNav(q){
+    q = q.toLowerCase().trim();
+    document.querySelectorAll('.nav-link').forEach(a=>{
+      a.classList.toggle('nav-hidden', q && !a.dataset.text.includes(q));
+    });
+  }
+
+  // close mobile sidebar after nav click
+  document.querySelectorAll('.nav-link').forEach(a=>a.addEventListener('click',()=>{
+    document.getElementById('sidebar').classList.remove('open');
+  }));
+</script>
+</body>
+</html>
